@@ -4,6 +4,8 @@ import os
 from langchain_community.chat_models import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+import rag
+import tempfile
 
 load_dotenv()
 
@@ -41,11 +43,24 @@ llm = ChatOpenAI(
 
 st.title("Freeeekyyyyy-Botttt")
 input_text = st.text_input("Ask Question")
+uploaded_file = st.file_uploader("Upload a pdf file ")
+
+
+
 
 output_parser = StrOutputParser()
 
 chain = prompt|llm|output_parser
 
+if st.button('Submit'):
+    if(uploaded_file and input_text):
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+            tmp_file.write(uploaded_file.read())
+            tmp_path = tmp_file.name
 
-if input_text:
-    st.markdown(chain.invoke({'Topic': input_text}))
+            ingested_docs = rag.dataIngestion(tmp_path)
+            transformed_docs = rag.transform(ingested_docs)
+            res = rag.vectorStoreAndEmbeddings(transformed_docs, input_text)
+        st.write(res)
+    else:
+        st.markdown(chain.invoke({'Topic': input_text}))

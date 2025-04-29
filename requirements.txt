@@ -7,3 +7,7 @@ uvicorn
 fastapi
 streamlit
 dotenv
+chromadb
+pypdf
+tiktoken
+sentence-transformers
